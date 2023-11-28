@@ -3,6 +3,7 @@ from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_absolute_error
 import matplotlib.pyplot as plt
 
+
 # Load data
 nifty_data = pd.read_csv('nifty_data.csv')
 sensex_data = pd.read_csv('sensex_data.csv')
@@ -16,7 +17,6 @@ sensex_inr = usd_inr_data.merge(sensex_data, how='outer', on='Date')
 nifty_inr.dropna(inplace=True)
 sensex_inr.dropna(inplace=True)
 
-# Replace ',' and convert to float for NIFTY DataFrame
 # Replace ',' and convert to float for NIFTY DataFrame
 nifty_inr['Close_N'] = nifty_inr['Close_N'].replace(',', '', regex=True).astype(float)
 nifty_inr['Open_N'] = nifty_inr['Open_N'].replace(',', '', regex=True).astype(float)
@@ -128,9 +128,13 @@ best_mae_sensex = float('inf')  # Initialize with a large value
 endog_column_sensex = train_endog_sensex.iloc[:, 0]
 model_sensex = ARIMA(endog_column_sensex, exog=train_exog_sensex, order=(2, 0, 2))
 results_sensex = model_sensex.fit()
+
+
 forecast_sensex = results_sensex.get_forecast(steps=len(test_endog_sensex), exog=test_exog_sensex)
 predicted_values_sensex = forecast_sensex.predicted_mean
 mae_sensex = mean_absolute_error(test_endog_sensex['Close_S'], predicted_values_sensex)
+
+
 best_order_sensex = (2, 0, 2)
 print(f"Best ARIMA Order for Sensex: {best_order_sensex}")
 print(f"Mean Absolute Error of Sensex: {mae_sensex}")
