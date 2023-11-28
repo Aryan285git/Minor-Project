@@ -2,12 +2,8 @@ import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_absolute_error
 import matplotlib.pyplot as plt
-import itertools
+from statsmodels.tsa.vector_ar.var_model import VAR
 
-# Define the range of p, d, q values to search
-p_values = range(5)
-d_values = range(5)
-q_values = range(5)
 
 # Load data
 nifty_data = pd.read_csv('nifty_data.csv')
@@ -35,16 +31,16 @@ nifty_inr['Date'] = pd.to_datetime(nifty_inr['Date'])
 nifty_inr.set_index('Date', inplace=True)
 
 # Split data into training and testing sets
-train_size = int(len(nifty_inr) *0.15)
-train_data = nifty_inr.iloc[train_size:]
-test_data = nifty_inr.iloc[:train_size]
+train_size = int(len(nifty_inr) *0.85)
+train_data = nifty_inr.iloc[:train_size]
+test_data = nifty_inr.iloc[train_size:]
 
 # Separate endogenous and exogenous variables for training and testing
-train_endog = train_data[['Close_N']]
-train_exog = train_data[['Open', 'High', 'Low', 'Close','Open_N', 'High_N', 'Low_N']]
+train_endog = train_data[['Open_N', 'High_N', 'Low_N', 'Close_N']]
+train_exog = train_data[['Open', 'High', 'Low', 'Close']]
 
-test_endog = test_data[['Close_N']]
-test_exog = test_data[['Open', 'High', 'Low', 'Close','Open_N', 'High_N', 'Low_N' ]]
+test_endog = test_data[['Open_N', 'High_N', 'Low_N', 'Close_N']]
+test_exog = test_data[['Open', 'High', 'Low', 'Close']]
 
 # Convert columns to numeric format
 train_endog = train_endog.apply(pd.to_numeric, errors='coerce')
@@ -60,12 +56,11 @@ test_exog.dropna(inplace=True)
 
 # Grid search for the best ARIMA order for NIFTY
 best_mae_nifty = float('inf')  # Initialize with a large value
-best_order_nifty = None
 
 # Try different values for p, d, q
 endog_column_nifty = train_endog.iloc[:, 0]
 
-model_nifty = ARIMA(endog_column_nifty, exog=train_exog, order=(0, 0, 4))
+model_nifty = ARIMA(endog_column_nifty, exog=train_exog, order=(1, 3, 3))
 results_nifty = model_nifty.fit()
 forecast_nifty = results_nifty.get_forecast(steps=len(test_endog), exog=test_exog)
 predicted_values_nifty = forecast_nifty.predicted_mean
@@ -103,16 +98,16 @@ sensex_inr['Date'] = pd.to_datetime(sensex_inr['Date'])
 sensex_inr.set_index('Date', inplace=True)
 
 # Split data into training and testing sets
-train_size_sensex = int(len(sensex_inr) * 0.15)
-train_data_sensex = sensex_inr.iloc[train_size_sensex:]
-test_data_sensex = sensex_inr.iloc[:train_size_sensex]
+train_size_sensex = int(len(sensex_inr) * 0.85)
+train_data_sensex = sensex_inr.iloc[:train_size_sensex]
+test_data_sensex = sensex_inr.iloc[train_size_sensex:]
 
 # Separate endogenous and exogenous variables for training and testing
-train_endog_sensex = train_data_sensex[[ 'Close_S']]
-train_exog_sensex = train_data_sensex[['Open', 'High', 'Low', 'Close','Open_S', 'High_S','Low_S']]
+train_endog_sensex = train_data_sensex[['Open_S', 'High_S', 'Low_S', 'Close_S']]
+train_exog_sensex = train_data_sensex[['Open', 'High', 'Low', 'Close']]
 
-test_endog_sensex = test_data_sensex[[ 'Close_S']]
-test_exog_sensex = test_data_sensex[['Open', 'High', 'Low', 'Close','Open_S', 'High_S','Low_S']]
+test_endog_sensex = test_data_sensex[['Open_S', 'High_S', 'Low_S', 'Close_S']]
+test_exog_sensex = test_data_sensex[['Open', 'High', 'Low', 'Close']]
 
 # Convert columns to numeric format
 train_endog_sensex = train_endog_sensex.apply(pd.to_numeric, errors='coerce')
@@ -132,7 +127,7 @@ best_mae_sensex = float('inf')  # Initialize with a large value
 # Try different values for p, d, q
 
 endog_column_sensex = train_endog_sensex.iloc[:, 0]
-model_sensex = ARIMA(endog_column_sensex, exog=train_exog_sensex, order=(0, 0, 3))
+model_sensex = ARIMA(endog_column_sensex, exog=train_exog_sensex, order=(2, 0, 2))
 results_sensex = model_sensex.fit()
 
 
@@ -141,7 +136,7 @@ predicted_values_sensex = forecast_sensex.predicted_mean
 mae_sensex = mean_absolute_error(test_endog_sensex['Close_S'], predicted_values_sensex)
 
 
-best_order_sensex = (0, 0, 3)
+best_order_sensex = (2, 0, 2)
 print(f"Best ARIMA Order for Sensex: {best_order_sensex}")
 print(f"Mean Absolute Error of Sensex: {mae_sensex}")
 
@@ -152,6 +147,62 @@ plt.plot(test_data_sensex.index, predicted_values_sensex, label='Predicted Sense
 plt.xlabel('Date')
 plt.ylabel('Sensex Close')
 plt.title('Actual vs Predicted Sensex Close')
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+
+##################################
+
+
+# Predict future values for NIFTY
+endog_column_nifty = nifty_inr[['Close_N']]
+exog_column_nifty = nifty_inr[['Open', 'High', 'Low', 'Close']]
+
+model_nifty = ARIMA(endog_column_nifty, exog=exog_column_nifty, order=(1, 3, 3))
+results_nifty = model_nifty.fit()
+
+# Number of future periods you want to predict
+future_periods = 2000  # Modify this based on how far ahead you want predictions
+
+# Forecast future values for NIFTY
+forecast_nifty = results_nifty.get_forecast(steps=future_periods, exog=exog_column_nifty[-future_periods:])
+predicted_values_nifty = forecast_nifty.predicted_mean
+
+# Plotting the extended predictions for NIFTY
+plt.figure(figsize=(10, 6))
+plt.plot(nifty_inr.index, nifty_inr['Close_N'], label='Actual NIFTY Close')
+plt.plot(predicted_values_nifty.index, predicted_values_nifty, label='Predicted NIFTY Close', linestyle='--')
+plt.xlabel('Date')
+plt.ylabel('NIFTY Close')
+plt.title('Extended Predictions for NIFTY Close')
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
+
+# Similarly, repeat the process for Sensex predictions extending into the future
+# ... (Your existing code for preprocessing and training for Sensex)
+
+# Predict future values for Sensex
+endog_column_sensex = sensex_inr[['Close_S']]
+exog_column_sensex = sensex_inr[['Open', 'High', 'Low', 'Close']]
+
+model_sensex = ARIMA(endog_column_sensex, exog=exog_column_sensex, order=(2, 0, 2))
+results_sensex = model_sensex.fit()
+
+# Forecast future values for Sensex
+forecast_sensex = results_sensex.get_forecast(steps=future_periods, exog=exog_column_sensex[-future_periods:])
+predicted_values_sensex = forecast_sensex.predicted_mean
+
+# Plotting the extended predictions for Sensex
+plt.figure(figsize=(10, 6))
+plt.plot(sensex_inr.index, sensex_inr['Close_S'], label='Actual Sensex Close')
+plt.plot(predicted_values_sensex.index, predicted_values_sensex, label='Predicted Sensex Close', linestyle='--')
+plt.xlabel('Date')
+plt.ylabel('Sensex Close')
+plt.title('Extended Predictions for Sensex Close')
 plt.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
