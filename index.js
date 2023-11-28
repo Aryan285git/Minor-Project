@@ -1,11 +1,14 @@
-// index.js
 const express = require('express');
+const cors = require('cors');
+
 const app = express();
 const PORT = 3000;
 
+app.use(cors());
 app.use(express.json());
 
-app.post('/api/predictor', (req, res) => {
+app.post('/api/predictor/:symbol', (req, res) => {
+  const { symbol } = req.params;
   const { toDate } = req.body;
 
   // Validate input date
@@ -13,9 +16,9 @@ app.post('/api/predictor', (req, res) => {
     return res.status(400).json({ error: 'toDate is required in the request body.' });
   }
 
-  // Your logic to process input date can go here
+  // Your prediction logic can go here for both Nifty and Sensex
   // For now, just sending it back as a response
-  res.json({ toDate });
+  res.json({ result: `${symbol === 'nifty' ? 'Nifty' : 'Sensex'} prediction result for ${toDate}` });
 });
 
 app.listen(PORT, () => {

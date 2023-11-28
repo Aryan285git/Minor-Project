@@ -2,6 +2,12 @@ import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_absolute_error
 import matplotlib.pyplot as plt
+import itertools
+
+# Define the range of p, d, q values to search
+p_values = range(5)
+d_values = range(5)
+q_values = range(5)
 
 # Load data
 nifty_data = pd.read_csv('nifty_data.csv')
@@ -17,7 +23,6 @@ nifty_inr.dropna(inplace=True)
 sensex_inr.dropna(inplace=True)
 
 # Replace ',' and convert to float for NIFTY DataFrame
-# Replace ',' and convert to float for NIFTY DataFrame
 nifty_inr['Close_N'] = nifty_inr['Close_N'].replace(',', '', regex=True).astype(float)
 nifty_inr['Open_N'] = nifty_inr['Open_N'].replace(',', '', regex=True).astype(float)
 nifty_inr['Low_N'] = nifty_inr['Low_N'].replace(',', '', regex=True).astype(float)
@@ -30,16 +35,16 @@ nifty_inr['Date'] = pd.to_datetime(nifty_inr['Date'])
 nifty_inr.set_index('Date', inplace=True)
 
 # Split data into training and testing sets
-train_size = int(len(nifty_inr) *0.85)
-train_data = nifty_inr.iloc[:train_size]
-test_data = nifty_inr.iloc[train_size:]
+train_size = int(len(nifty_inr) *0.15)
+train_data = nifty_inr.iloc[train_size:]
+test_data = nifty_inr.iloc[:train_size]
 
 # Separate endogenous and exogenous variables for training and testing
-train_endog = train_data[['Open_N', 'High_N', 'Low_N', 'Close_N']]
-train_exog = train_data[['Open', 'High', 'Low', 'Close']]
+train_endog = train_data[['Close_N']]
+train_exog = train_data[['Open', 'High', 'Low', 'Close','Open_N', 'High_N', 'Low_N']]
 
-test_endog = test_data[['Open_N', 'High_N', 'Low_N', 'Close_N']]
-test_exog = test_data[['Open', 'High', 'Low', 'Close']]
+test_endog = test_data[['Close_N']]
+test_exog = test_data[['Open', 'High', 'Low', 'Close','Open_N', 'High_N', 'Low_N' ]]
 
 # Convert columns to numeric format
 train_endog = train_endog.apply(pd.to_numeric, errors='coerce')
@@ -55,11 +60,12 @@ test_exog.dropna(inplace=True)
 
 # Grid search for the best ARIMA order for NIFTY
 best_mae_nifty = float('inf')  # Initialize with a large value
+best_order_nifty = None
 
 # Try different values for p, d, q
 endog_column_nifty = train_endog.iloc[:, 0]
 
-model_nifty = ARIMA(endog_column_nifty, exog=train_exog, order=(1, 3, 3))
+model_nifty = ARIMA(endog_column_nifty, exog=train_exog, order=(0, 0, 4))
 results_nifty = model_nifty.fit()
 forecast_nifty = results_nifty.get_forecast(steps=len(test_endog), exog=test_exog)
 predicted_values_nifty = forecast_nifty.predicted_mean
@@ -97,16 +103,16 @@ sensex_inr['Date'] = pd.to_datetime(sensex_inr['Date'])
 sensex_inr.set_index('Date', inplace=True)
 
 # Split data into training and testing sets
-train_size_sensex = int(len(sensex_inr) * 0.85)
-train_data_sensex = sensex_inr.iloc[:train_size_sensex]
-test_data_sensex = sensex_inr.iloc[train_size_sensex:]
+train_size_sensex = int(len(sensex_inr) * 0.15)
+train_data_sensex = sensex_inr.iloc[train_size_sensex:]
+test_data_sensex = sensex_inr.iloc[:train_size_sensex]
 
 # Separate endogenous and exogenous variables for training and testing
-train_endog_sensex = train_data_sensex[['Open_S', 'High_S', 'Low_S', 'Close_S']]
-train_exog_sensex = train_data_sensex[['Open', 'High', 'Low', 'Close']]
+train_endog_sensex = train_data_sensex[[ 'Close_S']]
+train_exog_sensex = train_data_sensex[['Open', 'High', 'Low', 'Close','Open_S', 'High_S','Low_S']]
 
-test_endog_sensex = test_data_sensex[['Open_S', 'High_S', 'Low_S', 'Close_S']]
-test_exog_sensex = test_data_sensex[['Open', 'High', 'Low', 'Close']]
+test_endog_sensex = test_data_sensex[[ 'Close_S']]
+test_exog_sensex = test_data_sensex[['Open', 'High', 'Low', 'Close','Open_S', 'High_S','Low_S']]
 
 # Convert columns to numeric format
 train_endog_sensex = train_endog_sensex.apply(pd.to_numeric, errors='coerce')
@@ -126,12 +132,16 @@ best_mae_sensex = float('inf')  # Initialize with a large value
 # Try different values for p, d, q
 
 endog_column_sensex = train_endog_sensex.iloc[:, 0]
-model_sensex = ARIMA(endog_column_sensex, exog=train_exog_sensex, order=(2, 0, 2))
+model_sensex = ARIMA(endog_column_sensex, exog=train_exog_sensex, order=(0, 0, 3))
 results_sensex = model_sensex.fit()
+
+
 forecast_sensex = results_sensex.get_forecast(steps=len(test_endog_sensex), exog=test_exog_sensex)
 predicted_values_sensex = forecast_sensex.predicted_mean
 mae_sensex = mean_absolute_error(test_endog_sensex['Close_S'], predicted_values_sensex)
-best_order_sensex = (2, 0, 2)
+
+
+best_order_sensex = (0, 0, 3)
 print(f"Best ARIMA Order for Sensex: {best_order_sensex}")
 print(f"Mean Absolute Error of Sensex: {mae_sensex}")
 
