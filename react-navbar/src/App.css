@@ -1,0 +1,82 @@
+/* src/App.css */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+}
+
+.content-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  margin: 20px;
+}
+
+.column {
+  text-align: center;
+  padding: 20px;
+  border-radius: 8px;
+  width: 80%;
+  margin: 10px 0;
+  background: linear-gradient(135deg, #fff, #f2f2f2); /* Gradient background */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease-in-out;
+
+  @media (min-width: 768px) {
+    width: 45%;
+  }
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Additional styling for input and button */
+input {
+  padding: 10px;
+  margin-bottom: 15px;
+  width: 80%;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+}
+
+/* Styles for Current Values */
+.column p {
+  margin: 10px 0;
+  font-size: 18px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .column {
+    padding: 15px;
+  }
+
+  input {
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+
+  button {
+    padding: 10px 16px;
+  }
+
+  .column p {
+    font-size: 16px;
+  }
+}

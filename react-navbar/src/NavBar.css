@@ -1,0 +1,22 @@
+/* src/NavBar.css */
+.navbar {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .navbar-title {
+    margin: 0;
+  }
+  
+  .content-container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px;
+  }
+  
+  .column {
+    text-align: center;
+  }
+  
