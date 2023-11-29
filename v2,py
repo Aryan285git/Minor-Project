@@ -67,6 +67,7 @@ endog_column_nifty = train_endog.iloc[:, 0]
 
 model_nifty = ARIMA(endog_column_nifty, exog=train_exog, order=(0, 0, 4))
 results_nifty = model_nifty.fit()
+
 forecast_nifty = results_nifty.get_forecast(steps=len(test_endog), exog=test_exog)
 predicted_values_nifty = forecast_nifty.predicted_mean
 mae_nifty = mean_absolute_error(test_endog['Close_N'], predicted_values_nifty)             
@@ -162,7 +163,7 @@ plt.show()
 
 #################
 
-
+"""
 
 # Input date from the user
 input_date = '2023-12-15'  # Replace this with user input logic
@@ -196,10 +197,23 @@ plt.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
-
+"""
 
 #, exog=exog_sensex.loc[future_dates]
+train_data_nifty_p_endo=nifty_inr["Close_N"]
+train_data_nifty_p_exo=nifty_inr[['Open', 'High', 'Low', 'Close','Open_N', 'High_N', 'Low_N']]
+endog_col=nifty_inr.iloc[:,0]
+model_nifty_p=ARIMA(endog_col,exog=train_data_nifty_p_exo,order=(0, 0, 4))
+result_nifty_p=model_nifty_p.fit()
+forecast_nifty_p = result_nifty_p.get_forecast(steps=len(train_data_nifty_p_endo), exog=train_data_nifty_p_exo)
 
-
-
-
+# Visualize Sensex predictions with the best order
+plt.figure(figsize=(10, 6))
+plt.plot(forecast_nifty_p.predicted_mean, label='Predicted Nifty Close', linestyle='--')
+plt.xlabel('Date')
+plt.ylabel('Sensex Close')
+plt.title('Actual vs Predicted Sensex Close')
+plt.legend()
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.show()
