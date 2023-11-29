@@ -31,23 +31,21 @@ plt.tight_layout()
 plt.show()
 
 
-# Forecasting future values for Sensex
-endog_column_sensex = sensex_inr['Close_S']
-exog_sensex = sensex_inr[['Open', 'High', 'Low', 'Close','Open_S', 'High_S','Low_S']]
+# ...
+endog_data_nifty_p = nifty_inr["Close_N"]
+train_data_nifty_p_exo = nifty_inr[['Open', 'High', 'Low', 'Close','Open_N', 'High_N', 'Low_N']]
+endog_col_nifty_p = nifty_inr.iloc[:, 0]
 
-model_sensex = ARIMA(endog_column_sensex, order=(0, 0, 3))
-results_sensex = model_sensex.fit()
+model_nifty_p = ARIMA(endog_col_nifty_p, exog=train_data_nifty_p_exo, order=(0, 0, 4))
+result_nifty_p = model_nifty_p.fit()
+forecast_nifty_p = result_nifty_p.get_forecast(steps=len(endog_data_nifty_p), exog=train_data_nifty_p_exo)
 
-# Forecast future values for Sensex
-forecast_sensex = results_sensex.get_forecast(steps=len(future_dates))
-predicted_values_sensex = forecast_sensex.predicted_mean
-
-# Plotting the predicted Sensex values for future dates
+# Visualize Nifty predictions with the best order
 plt.figure(figsize=(10, 6))
-plt.plot(future_dates, predicted_values_sensex, label='Predicted Sensex Close', linestyle='--')
+plt.plot(forecast_nifty_p.predicted_mean, label='Predicted Nifty Close', linestyle='--')
 plt.xlabel('Date')
-plt.ylabel('Sensex Close')
-plt.title('Predicted Sensex Close from {} to {}'.format(last_available_date, input_date))
+plt.ylabel('Nifty Close')
+plt.title('Predicted Nifty Close')
 plt.legend()
 plt.xticks(rotation=45)
 plt.tight_layout()
